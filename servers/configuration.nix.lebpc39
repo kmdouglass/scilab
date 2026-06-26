@@ -1,0 +1,77 @@
+{ config, lib, pkgs, ... }:
+
+{
+  imports = [
+    ./hardware-configuration.nix
+    ../modules/mosquitto.nix
+  ];
+
+  # Allow unfree packages
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    "nvidia-x11"
+    "nvidia-settings"
+  ];
+
+  # Boot
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  # Hardware
+  hardware.graphics.enable = true;
+  hardware.nvidia.open = false;
+
+  # Networking
+  networking.hostName = "lebpc39";
+  networking.useDHCP = false;
+  networking.interfaces.enp0s25 = {
+    ipv4.addresses = [{
+      address = "w.w.w.w"; # set per-machine
+      prefixLength = 24;
+    }];
+  };
+  networking.defaultGateway = "x.x.x.x"; # set per-machine
+  networking.nameservers = [ "y.y.y.y" "z.z.z.z" ]; # set per-machine
+  networking.firewall.allowedTCPPorts = [ 22 ];
+
+  # Locale
+  time.timeZone = "Europe/Amsterdam";
+
+  # Users
+  users.users.douglass = {
+    isNormalUser = true;
+    description = "Kyle Douglass";
+    extraGroups = [ "wheel" ];
+    shell = pkgs.bash;
+    home = "/home/douglass";
+    packages = with pkgs; [ tree ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBh9P2MQKwWvIupNMe29nyy/PknODm/Ydm4KH/LE3hk6"
+    ];
+  };
+
+  # Packages
+  environment.systemPackages = with pkgs; [
+    vim
+    wget
+  ];
+
+  # Services
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+    };
+  };
+  services.xserver.videoDrivers = [ "nvidia" ];
+
+  # Storage
+  swapDevices = [{
+    device = "/swap";
+    size = 2048;
+  }];
+
+  # Do NOT change this value after the initial install. It maintains
+  # compatibility with application data created on older NixOS versions.
+  system.stateVersion = "25.11";
+}
