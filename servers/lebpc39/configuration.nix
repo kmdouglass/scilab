@@ -1,10 +1,20 @@
 { config, lib, pkgs, ... }:
 
-{
+let
+  network = import ./network-local.nix;
+in {
   imports = [
     ./hardware-configuration.nix
-    ../modules/mosquitto.nix
+     inputs.sops-nix.nixosModules.sops
+    ./mqtt.nix
   ];
+
+  # Nix Flakes
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  # SOPS
+  sops.defaultSopsFile = ../secrets/secrets.yaml;
+  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
@@ -25,12 +35,12 @@
   networking.useDHCP = false;
   networking.interfaces.enp0s25 = {
     ipv4.addresses = [{
-      address = "w.w.w.w"; # set per-machine
-      prefixLength = 24;
+      address = network.address;
+      prefixLength = network.prefixLength;
     }];
   };
-  networking.defaultGateway = "x.x.x.x"; # set per-machine
-  networking.nameservers = [ "y.y.y.y" "z.z.z.z" ]; # set per-machine
+  networking.defaultGateway = network.gateway;
+  networking.nameservers = network.nameservers;
   networking.firewall.allowedTCPPorts = [ 22 ];
 
   # Locale

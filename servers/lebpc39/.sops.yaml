@@ -1,0 +1,9 @@
+keys:
+  - &douglass age1chf7335zp99f6qxjnl50r7kugg9cenqg95zqxl35jdps6475jf9q4new47
+  - &lebpc39 age17qz9ancg0gzzelwzyggf7050ys4qkwdcwdp573d3han4r4l7kdksl292t7
+creation_rules:
+  - path_regex: secrets/.*\.yaml$
+    key_groups:
+      - age:
+          - *douglass
+          - *lebpc39
