@@ -1,20 +1,15 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, scilab-private, ... }:
 
 let
-  network = import ./network-local.nix;
+  network = import "${scilab-private}/servers/lebpc39/network-local.nix";
 in {
   imports = [
     ./hardware-configuration.nix
-     inputs.sops-nix.nixosModules.sops
     ./mqtt.nix
   ];
 
   # Nix Flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
-  # SOPS
-  sops.defaultSopsFile = ../secrets/secrets.yaml;
-  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
