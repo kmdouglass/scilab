@@ -21,6 +21,7 @@
     environmentFiles = [ "/etc/telegraf/secrets.env" ];
     extraConfig = {
       inputs.mqtt_consumer = {
+        name_override = "environmental_sensors";
         servers = [ "tcp://localhost:1883" ];
         topics = [ "bsp125/+/SENSOR" ];
         data_format = "json";
