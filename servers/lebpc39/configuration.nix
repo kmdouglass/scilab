@@ -5,6 +5,7 @@ let
 in {
   imports = [
     ./hardware-configuration.nix
+    ./metrics.nix
     ./mqtt.nix
   ];
 
