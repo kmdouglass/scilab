@@ -12,9 +12,11 @@ in {
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Allow unfree packages
+
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "nvidia-x11"
     "nvidia-settings"
+    "nvidia-kernel-modules"
   ];
 
   # Boot

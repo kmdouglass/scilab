@@ -2,7 +2,7 @@
   description = "lebpc39 NixOS config";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
     # Host-specific settings that must stay out of this public repo (e.g.
     # real network addresses). Points at a private, local-only git repo;
