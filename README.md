@@ -10,11 +10,12 @@ These files must be deployed out-of-band to the target machine:
 - `/etc/mosquitto/secrets/laboleb.password` - The password for the laboleb mosquitto user
 - `/etc/influxdb2/secrets/laboleb.password` - The password for the laboleb InfluxDB2 user (must be owned by the `influxdb2:influxdb2` Linux user:group)
 - `/etc/influxdb2/secrets/laboleb.token` - API token generated with the command `openssl rand -hex 32`
-- `/etc/telegraf/secrets.env` - Credentials Telegraf uses to connect to the local Mosquitto broker as the laboleb user:
+- `/etc/telegraf/secrets.env` - Credentials Telegraf uses to connect to the local Mosquitto broker as the laboleb user, and to authenticate to InfluxDB2:
 
   ```
   MQTT_USERNAME=laboleb
   MQTT_PASSWORD=<same password as /etc/mosquitto/secrets/laboleb.password>
+  INFLUX_TOKEN=<same token as /etc/influxdb2/secrets/laboleb.token>
   ```
 
 ### Private flake input

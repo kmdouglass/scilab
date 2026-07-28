@@ -31,6 +31,16 @@
       outputs.file = {
         files = [ "stdout" ];
       };
+
+      outputs.influxdb_v2 = {
+        urls = [ "http://localhost:8086" ];
+        token = "$INFLUX_TOKEN";
+        organization = "LEB";
+        bucket = "leb_time_series_data";
+      };
     };
   };
+
+  systemd.services.telegraf.after = [ "influxdb2.service" ];
+  systemd.services.telegraf.wants = [ "influxdb2.service" ];
 }
