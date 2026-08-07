@@ -3,6 +3,15 @@ Self-hosted services for a science lab
 
 ## Deployments
 
+### Deployment command
+
+Apply the configuration from the server's directory:
+
+```console
+nix run nixpkgs#nixos-rebuild -- switch --flake .#<SERVER_NAME> \
+  --target-host <USER>@<SERVER_NAME> --build-host <USER>@<SERVER_NAME> --ask-sudo-password
+```
+
 ### Out-of-band files
 
 These files must be deployed out-of-band to the target machine:
@@ -66,12 +75,3 @@ there and copy the updated file back into this repo.
 
 Then commit the update. Deploying without doing this risks the config
 referencing stale device labels.
-
-### Deployment command
-
-Then apply the configuration:
-
-```console
-nix run nixpkgs#nixos-rebuild -- switch --flake .#<SERVER_NAME> \
-  --target-host <USER>@<SERVER_NAME> --build-host <USER>@<SERVER_NAME> --ask-sudo-password
-```
