@@ -16,6 +16,10 @@ in {
     trusted-public-keys = [ "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E=" ];
   };
 
+  # Enable nix-ld for remote VS Code development
+  # https://nixos.wiki/wiki/Visual_Studio_Code#Remote_SSH
+  programs.nix-ld.enable = true;
+
   # Allow unfree packages
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "nvidia-x11"
