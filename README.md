@@ -27,6 +27,18 @@ These files must be deployed out-of-band to the target machine:
   INFLUX_TOKEN=<same token as /etc/influxdb2/secrets/laboleb.token>
   ```
 
+- `/etc/tigervnc/secrets/douglass.password` - VNC password for the TigerVNC
+  remote desktop session, generated on the target machine with:
+
+  ```console
+  mkdir -p /etc/tigervnc/secrets
+  vncpasswd /etc/tigervnc/secrets/douglass.password
+  ```
+
+  Also run `loginctl enable-linger douglass` once so the on-demand
+  `systemctl --user start tigervnc` session survives closing the SSH
+  connection that started it.
+
 ### Private flake input
 
 Nix flakes only see files tracked by Git, so anything with real

@@ -8,6 +8,7 @@ in {
     ./bash-aliases.nix
     ./metrics.nix
     ./mqtt.nix
+    ./remote.nix
   ];
 
   # Nix Flakes and CUDA cache
