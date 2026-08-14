@@ -5,13 +5,18 @@ let
   # here; there is no monitor attached, so the nvidia driver is told to
   # start anyway.
   gpuXorgConf = pkgs.writeText "gpu-xorg.conf" ''
-    Section "Module"
-      Load "glx"
+    Section "Files"
+      # nvidia_drv.so loads its own GLX submodule (glxserver_nvidia)
+      # internally once initialized, so no "Load glx" directive is needed
+      # here -- that would instead pull in xorg-server's Mesa libglx.so.
+      ModulePath "${config.hardware.nvidia.package.bin}/lib/xorg/modules"
+      ModulePath "${pkgs.xorg-server}/lib/xorg/modules"
     EndSection
 
     Section "Device"
       Identifier "Device0"
       Driver "nvidia"
+      Option "SidebandSocketPath" "/run/nvidia-xdriver/"
     EndSection
 
     Section "Screen"
@@ -60,11 +65,20 @@ in
     pkgs.virtualgl
     pkgs.tigervnc
     pkgs.icewm
+    pkgs.xterm
+    pkgs.mesa-demos
   ];
 
   # Members can vglrun against the headless GPU X server on :0.
   users.groups.vglusers.members = [ "douglass" ];
   users.users.douglass.extraGroups = [ "video" "render" ];
+
+  # icewm ships with an empty menu by default -- it does not scan $PATH or
+  # .desktop files on its own, so entries have to be listed explicitly.
+  environment.etc."icewm/menu".text = ''
+    prog "XTerm" xterm ${pkgs.xterm}/bin/xterm
+    prog "GLX Info (vglrun)" "" ${pkgs.xterm}/bin/xterm -hold -e ${pkgs.virtualgl}/bin/vglrun -d :0 ${pkgs.mesa-demos}/bin/glxinfo
+  '';
 
   systemd.services.gpu-xorg = {
     description = "Headless X server bound to the NVIDIA GPU for VirtualGL";
