@@ -1,6 +1,9 @@
 # scilab
 Self-hosted services for a science lab
 
+See [REMOTE.md](REMOTE.md) for lebpc39's remote GPU development setup
+(TigerVNC + VirtualGL).
+
 ## Deployments
 
 ### Deployment command
@@ -37,7 +40,8 @@ These files must be deployed out-of-band to the target machine:
 
   Also run `loginctl enable-linger douglass` once so the on-demand
   `systemctl --user start tigervnc` session survives closing the SSH
-  connection that started it.
+  connection that started it. See [REMOTE.md](REMOTE.md) for full setup and
+  usage.
 
 ### Private flake input
 
