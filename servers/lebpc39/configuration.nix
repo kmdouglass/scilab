@@ -9,6 +9,7 @@ in {
     ./metrics.nix
     ./mqtt.nix
     ./remote.nix
+    ./reverse-proxy.nix
   ];
 
   # Nix Flakes and CUDA cache

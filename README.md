@@ -43,6 +43,19 @@ These files must be deployed out-of-band to the target machine:
   connection that started it. See [REMOTE.md](REMOTE.md) for full setup and
   usage.
 
+### Accessing InfluxDB2
+
+InfluxDB2's UI is intentionally not exposed on the firewall or reverse-proxied
+(its web UI hardcodes absolute paths and has no subpath config, so it can't
+be proxied cleanly under a path prefix). Reach it via an SSH tunnel, the same
+way VNC is accessed (see [REMOTE.md](REMOTE.md)):
+
+```console
+ssh -L 8086:localhost:8086 douglass@lebpc39
+```
+
+Then browse `http://localhost:8086`.
+
 ### Private flake input
 
 Nix flakes only see files tracked by Git, so anything with real

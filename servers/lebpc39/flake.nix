@@ -26,7 +26,9 @@
             enable = true;
             port = 8501;          # default
             address = "0.0.0.0";  # default; binds to all interfaces for LAN access
-            openFirewall = true;  # opens `port` in the NixOS firewall
+            # Reached only through the Caddy reverse proxy on port 80
+            # (reverse-proxy.nix), not directly.
+            openFirewall = false;
           };
         }
       ];
