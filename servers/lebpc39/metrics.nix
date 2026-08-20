@@ -1,7 +1,10 @@
 { config, lib, pkgs, ... }:
 
 {
-    networking.firewall.allowedTCPPorts = [ 8086 ];
+    # Not exposed on the firewall or proxied through Caddy: InfluxDB2's UI
+    # hardcodes absolute paths and has no subpath/base-URL config, so it
+    # can't be reverse-proxied cleanly. Access it via SSH tunnel instead
+    # -- see README.md.
 
     services.influxdb2 = {
         enable = true;
