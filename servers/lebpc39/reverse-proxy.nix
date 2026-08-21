@@ -1,5 +1,29 @@
 { config, lib, pkgs, ... }:
 
+let
+  # Apps listed on the /streamlit landing page. Each app also needs its own
+  # `handle` block below (reverse-proxying to its own port/subpath) and, for
+  # Streamlit apps, STREAMLIT_SERVER_BASE_URL_PATH set to match.
+  apps = [
+    { name = "Focus Field Viewer"; path = "/ffv/"; }
+  ];
+
+  landingPage = pkgs.writeTextDir "index.html" ''
+    <!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>lebpc39 apps</title>
+    </head>
+    <body>
+      <h1>lebpc39 apps</h1>
+      <ul>
+        ${lib.concatMapStringsSep "\n        " (a: ''<li><a href="${a.path}">${a.name}</a></li>'') apps}
+      </ul>
+    </body>
+    </html>
+  '';
+in
 {
   networking.firewall.allowedTCPPorts = [ 80 ];
 
@@ -9,6 +33,13 @@
     globalConfig = "auto_https off";
     virtualHosts."http://lebpc39.epfl.ch, http://lebpc39" = {
       extraConfig = ''
+        redir /streamlit /streamlit/ 308
+
+        handle_path /streamlit/* {
+          root * ${landingPage}
+          file_server
+        }
+
         redir /ffv /ffv/ 308
 
         handle /ffv/* {
