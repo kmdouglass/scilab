@@ -8,6 +8,7 @@ in {
     ./bash-aliases.nix
     ./metrics.nix
     ./mqtt.nix
+    ./probe-rs.nix
     ./remote.nix
     ./reverse-proxy.nix
   ];
