@@ -24,11 +24,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1786603010,
-        "narHash": "sha256-puEQ/2Eh9SmjmoXeCeEM2T5EGr/Ei5dAwjm4qH+XgzM=",
+        "lastModified": 1787822793,
+        "narHash": "sha256-q3MXriGpNWUioEoEENuxoFE/GkTezseeGXy4VJdJQaw=",
         "owner": "LEB-EPFL",
         "repo": "focus-field-viewer",
-        "rev": "ab368729aa5ebc4a7cbd5622f152805a6a0f4d86",
+        "rev": "17e45d8a9ffcdb525052f9bbe80d90188e31c016",
         "type": "github"
       },
       "original": {
@@ -39,11 +39,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1786514691,
-        "narHash": "sha256-9dkt1i5JNbEfPb+EjLcSDNs8zqEHQ/1JlSaKgj0SBAg=",
+        "lastModified": 1787498568,
+        "narHash": "sha256-9i/VTdusq/+NM/tz+J1Re+ojkMB8MBf0QshnYfzHz30=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "867dcbc30bafe3c862ef88620f2e7a109d7d3be5",
+        "rev": "56c02bc00adcf003215cc4bd996d6efaf4cff188",
         "type": "github"
       },
       "original": {
