@@ -27,6 +27,7 @@ in {
 
   # Misc. modules
   programs.direnv.enable = true;
+  programs.ssh.startAgent = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
