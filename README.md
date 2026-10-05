@@ -43,6 +43,25 @@ These files must be deployed out-of-band to the target machine:
   connection that started it. See [REMOTE.md](REMOTE.md) for full setup and
   usage.
 
+- `/etc/caddy/secrets.env` - Password hash for the PhD goals page at
+  `/goals/` (username `leb`). Without it the page stays locked. Generate the
+  hash on any machine with Nix (it prompts for the password):
+
+  ```console
+  nix-shell -p caddy --run 'caddy hash-password'
+  ```
+
+  Then, on the target machine:
+
+  ```console
+  sudo mkdir -p /etc/caddy
+  echo 'GOALS_AUTH_HASH=<hash>' | sudo tee /etc/caddy/secrets.env
+  sudo chmod 600 /etc/caddy/secrets.env
+  sudo systemctl restart caddy
+  ```
+
+  Use single quotes so the shell leaves the `$` signs in the hash alone.
+
 ### Accessing InfluxDB2
 
 InfluxDB2's UI is intentionally not exposed on the firewall or reverse-proxied
