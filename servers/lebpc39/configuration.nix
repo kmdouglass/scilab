@@ -76,6 +76,7 @@ in {
   # Packages
   environment.systemPackages = with pkgs; [
     git
+    tmux
     wget
   ];
 
