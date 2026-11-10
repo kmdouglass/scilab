@@ -94,6 +94,14 @@ These files must be deployed out-of-band to the target machine:
   exist, so it reads this copy instead. Update it whenever the original
   changes.
 
+- `/etc/cifs/secrets/sb-nas1.credentials` - Login for the `sb-nas1` network
+  drive mounted at `/mnt/sb-nas1`. Must be owned by root with mode `600`:
+
+  ```
+  username=douglass
+  password=<password>
+  ```
+
 ### Accessing InfluxDB2
 
 InfluxDB2's UI is intentionally not exposed on the firewall or reverse-proxied

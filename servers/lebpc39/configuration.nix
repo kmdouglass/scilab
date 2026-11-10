@@ -99,6 +99,22 @@ in {
     size = 2048;
   }];
 
+  fileSystems."/mnt/sb-nas1" = {
+    device = "//sb-nas1.rcp.epfl.ch/leb";
+    fsType = "cifs";
+    options = [
+      "ro"
+      "credentials=/etc/cifs/secrets/sb-nas1.credentials"
+      "iocharset=utf8"
+      "uid=douglass"
+      "gid=users"
+      "file_mode=0444"
+      "dir_mode=0555"
+      "nofail"
+      "x-systemd.automount"
+    ];
+  };
+
   # Do NOT change this value after the initial install. It maintains
   # compatibility with application data created on older NixOS versions.
   system.stateVersion = "25.11";
