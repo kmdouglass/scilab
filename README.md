@@ -62,6 +62,12 @@ These files must be deployed out-of-band to the target machine:
 
   Use single quotes so the shell leaves the `$` signs in the hash alone.
 
+- `/etc/scilab-private/servers/lebpc39/network-local.nix` - Copy of the file
+  from the `scilab-private` repo. The weekly automatic upgrade runs on the
+  server, where the repo's `flake.lock` path to `scilab-private` doesn't
+  exist, so it reads this copy instead. Update it whenever the original
+  changes.
+
 ### Accessing InfluxDB2
 
 InfluxDB2's UI is intentionally not exposed on the firewall or reverse-proxied

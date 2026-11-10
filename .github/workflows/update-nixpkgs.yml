@@ -1,0 +1,73 @@
+name: Update nixpkgs
+
+# Bumps lebpc39's nixpkgs input and pushes the new lock file to main only if
+# the system still builds. lebpc39 upgrades itself from main on Thursdays (see
+# servers/lebpc39/auto-upgrade.nix), so Tuesday leaves time to notice a failure.
+on:
+  schedule:
+    - cron: "0 3 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-nixpkgs
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    defaults:
+      run:
+        working-directory: servers/lebpc39
+    steps:
+      - name: Free disk space for the system closure
+        working-directory: /
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+
+      - name: Update the nixpkgs input
+        id: update
+        run: |
+          nix flake update nixpkgs
+          if git diff --quiet -- flake.lock; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build the system
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          # CI can't reach scilab-private, so build against placeholder network
+          # values (RFC 5737). Generated here because .gitignore deliberately
+          # blocks any file named network-local.nix from this repo.
+          stub="$RUNNER_TEMP/scilab-private-stub"
+          mkdir -p "$stub/servers/lebpc39"
+          cat > "$stub/servers/lebpc39/network-local.nix" <<'EOF'
+          {
+            address = "192.0.2.10";
+            prefixLength = 24;
+            gateway = "192.0.2.1";
+            nameservers = [ "192.0.2.53" ];
+          }
+          EOF
+          nix build --no-link -L \
+            --override-input scilab-private "path:$stub" \
+            '.#nixosConfigurations.lebpc39.config.system.build.toplevel'
+
+      - name: Push the new lock file
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add flake.lock
+          git commit -m "Update nixpkgs for lebpc39"
+          git pull --rebase origin main
+          git push origin HEAD:main

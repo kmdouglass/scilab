@@ -5,6 +5,7 @@ let
 in {
   imports = [
     ./hardware-configuration.nix
+    ./auto-upgrade.nix
     ./bash-aliases.nix
     ./metrics.nix
     ./mqtt.nix
