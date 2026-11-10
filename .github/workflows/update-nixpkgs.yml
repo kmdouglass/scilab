@@ -1,8 +1,11 @@
 name: Update nixpkgs
 
-# Bumps lebpc39's nixpkgs input and pushes the new lock file to main only if
-# the system still builds. lebpc39 upgrades itself from main on Thursdays (see
-# servers/lebpc39/auto-upgrade.nix), so Tuesday leaves time to notice a failure.
+# Bumps lebpc39's nixpkgs input and merges the new lock file into main only if
+# the system still builds. main requires pull requests, so the job opens one
+# and merges it itself; this needs "Allow GitHub Actions to create and approve
+# pull requests" in the repo's Actions settings. lebpc39 upgrades itself from
+# main on Thursdays (see servers/lebpc39/auto-upgrade.nix), so Tuesday leaves
+# time to notice a failure.
 on:
   schedule:
     - cron: "0 3 * * 2"
@@ -10,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: update-nixpkgs
@@ -62,12 +66,26 @@ jobs:
             --override-input scilab-private "path:$stub" \
             '.#nixosConfigurations.lebpc39.config.system.build.toplevel'
 
-      - name: Push the new lock file
+      - name: Merge the new lock file through a pull request
         if: steps.update.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          branch="update-nixpkgs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
           git add flake.lock
           git commit -m "Update nixpkgs for lebpc39"
-          git pull --rebase origin main
-          git push origin HEAD:main
+          git push origin "$branch"
+          pr=$(gh pr create --base main --head "$branch" \
+            --title "Update nixpkgs for lebpc39" \
+            --body "Automated weekly update. The system built successfully with this lock file.")
+          # GitHub may still be computing mergeability just after creation.
+          for _ in 1 2 3 4 5; do
+            if gh pr merge "$pr" --squash --delete-branch; then
+              exit 0
+            fi
+            sleep 15
+          done
+          exit 1

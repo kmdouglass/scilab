@@ -15,6 +15,32 @@ nix run nixpkgs#nixos-rebuild -- switch --flake .#<SERVER_NAME> \
   --target-host <USER>@<SERVER_NAME> --build-host <USER>@<SERVER_NAME> --ask-sudo-password
 ```
 
+### Upgrading to a new NixOS release
+
+NixOS releases come out around the end of May and November, and each one is
+supported for about a month after the next. The weekly update workflow only
+follows the release named in a server's `flake.nix`, so moving to a new one is
+a manual job. Do it while someone is on site, in case the machine doesn't come
+back after a reboot.
+
+1. Read the release notes at <https://nixos.org/manual/nixos/stable/release-notes>
+   for removed or renamed options.
+2. In `servers/<SERVER_NAME>/flake.nix`, change the `nixpkgs.url` release, for
+   example from `nixos-26.05` to `nixos-26.11`.
+3. From the server's directory, update the lock file and build without
+   activating:
+
+   ```console
+   nix flake update nixpkgs
+   nix build --no-link '.#nixosConfigurations.<SERVER_NAME>.config.system.build.toplevel'
+   ```
+
+4. Merge the change into `main` through a pull request, then deploy it with
+   the command above and reboot.
+
+Do not change `system.stateVersion`. It tracks the release a machine was first
+installed with, not the one it runs.
+
 ### Out-of-band files
 
 These files must be deployed out-of-band to the target machine:
