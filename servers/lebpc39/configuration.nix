@@ -28,6 +28,7 @@ in {
   # Misc. modules
   programs.direnv.enable = true;
   programs.ssh.startAgent = true;
+  virtualisation.docker.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
@@ -64,7 +65,7 @@ in {
   users.users.douglass = {
     isNormalUser = true;
     description = "Kyle Douglass";
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "docker" ];
     shell = pkgs.bash;
     home = "/home/douglass";
     packages = with pkgs; [ tree ];
@@ -76,6 +77,7 @@ in {
   # Packages
   environment.systemPackages = with pkgs; [
     git
+    just
     tmux
     wget
   ];
