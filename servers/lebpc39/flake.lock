@@ -24,11 +24,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1787822793,
-        "narHash": "sha256-q3MXriGpNWUioEoEENuxoFE/GkTezseeGXy4VJdJQaw=",
+        "lastModified": 1794901542,
+        "narHash": "sha256-cRZoOrRW8HZBhRzrQRoCZj4qhJKrXMQAL90rxM8WqMw=",
         "owner": "LEB-EPFL",
         "repo": "focus-field-viewer",
-        "rev": "17e45d8a9ffcdb525052f9bbe80d90188e31c016",
+        "rev": "85e6067fcccbdf156434ebdf4785b395d6be5290",
         "type": "github"
       },
       "original": {
