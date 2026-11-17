@@ -23,7 +23,7 @@
       inputs.mqtt_consumer = {
         name_override = "environmental_sensors";
         servers = [ "tcp://localhost:1883" ];
-        topics = [ "bsp125/+/SENSOR" ];
+        topics = [ "bsp125/+/SENSOR" "bsp126/+/SENSOR" ];
         data_format = "json";
         username = "$MQTT_USERNAME";
         password = "$MQTT_PASSWORD";
