@@ -1,11 +1,14 @@
 name: Update nixpkgs
 
-# Bumps lebpc39's nixpkgs input and merges the new lock file into main only if
-# the system still builds. main requires pull requests, so the job opens one
-# and merges it itself; this needs "Allow GitHub Actions to create and approve
-# pull requests" in the repo's Actions settings. lebpc39 upgrades itself from
-# main on Thursdays (see servers/lebpc39/auto-upgrade.nix), so Tuesday leaves
-# time to notice a failure.
+# Bumps lebpc39's nixpkgs and focus-field-viewer inputs, keeping each update
+# only if the system still builds with it. The nixpkgs update is merged into
+# main straight away; main requires pull requests, so the job opens one and
+# merges it itself. The focus-field-viewer update is left as an open pull
+# request for a person to review. This needs "Allow GitHub Actions to create
+# and approve pull requests" in the repo's Actions settings. lebpc39 upgrades
+# itself from main on Thursdays (see servers/lebpc39/auto-upgrade.nix), so
+# Tuesday leaves time to notice a failure.
+
 on:
   schedule:
     - cron: "0 3 * * 2"
@@ -36,18 +39,8 @@ jobs:
 
       - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
 
-      - name: Update the nixpkgs input
+      - name: Update each input and build the system
         id: update
-        run: |
-          nix flake update nixpkgs
-          if git diff --quiet -- flake.lock; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Build the system
-        if: steps.update.outputs.changed == 'true'
         run: |
           # CI can't reach scilab-private, so build against placeholder network
           # values (RFC 5737). Generated here because .gitignore deliberately
@@ -62,19 +55,54 @@ jobs:
             nameservers = [ "192.0.2.53" ];
           }
           EOF
-          nix build --no-link -L \
-            --override-input scilab-private "path:$stub" \
-            '.#nixosConfigurations.lebpc39.config.system.build.toplevel'
 
-      - name: Merge the new lock file through a pull request
-        if: steps.update.outputs.changed == 'true'
+          # Each input is updated and built on its own, on top of the updates
+          # already accepted, and rolled back if the system no longer builds.
+          # A broken focus-field-viewer commit therefore can't hold back
+          # nixpkgs security updates, or the other way round.
+          updated=()
+          failed=()
+          for input in nixpkgs focus-field-viewer; do
+            cp flake.lock "$RUNNER_TEMP/flake.lock.prev"
+            nix flake update "$input"
+            if cmp -s flake.lock "$RUNNER_TEMP/flake.lock.prev"; then
+              echo "$input is already up to date."
+              continue
+            fi
+            if nix build --no-link -L \
+                --override-input scilab-private "path:$stub" \
+                '.#nixosConfigurations.lebpc39.config.system.build.toplevel'; then
+              updated+=("$input")
+              # The lock file with this input and every earlier accepted one.
+              cp flake.lock "$RUNNER_TEMP/flake.lock.$input"
+            else
+              echo "::error::The system does not build with the new $input; keeping the old one."
+              cp "$RUNNER_TEMP/flake.lock.prev" flake.lock
+              failed+=("$input")
+            fi
+          done
+
+          [[ " ${updated[*]} " == *" nixpkgs "* ]] && nixpkgs=true || nixpkgs=false
+          [[ " ${updated[*]} " == *" focus-field-viewer "* ]] && ffv=true || ffv=false
+          echo "nixpkgs=$nixpkgs" >> "$GITHUB_OUTPUT"
+          echo "focus_field_viewer=$ffv" >> "$GITHUB_OUTPUT"
+          echo "failed=${failed[*]}" >> "$GITHUB_OUTPUT"
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # nixpkgs updates are merged without review, so security fixes reach
+      # lebpc39 on Thursday without anyone having to step in.
+      - name: Merge the nixpkgs update through a pull request
+        if: steps.update.outputs.nixpkgs == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           branch="update-nixpkgs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "$branch"
+          cp "$RUNNER_TEMP/flake.lock.nixpkgs" flake.lock
           git add flake.lock
           git commit -m "Update nixpkgs for lebpc39"
           git push origin "$branch"
@@ -88,4 +116,55 @@ jobs:
             fi
             sleep 15
           done
+          exit 1
+
+      # focus-field-viewer's NixOS module runs as root on lebpc39, and a build
+      # can't tell whether the app still works, so its updates wait for a
+      # person to review and merge them. The PR lives on one fixed branch that
+      # is refreshed each week, so unreviewed updates don't pile up.
+      - name: Open a pull request for the focus-field-viewer update
+        if: steps.update.outputs.focus_field_viewer == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="update-focus-field-viewer"
+          # Start from main as it is now, including any nixpkgs update merged
+          # above, so the PR only changes focus-field-viewer.
+          git fetch origin main
+          git switch --discard-changes --force-create "$branch" origin/main
+          cp "$RUNNER_TEMP/flake.lock.focus-field-viewer" flake.lock
+
+          ffv_rev() { jq -r '.nodes["focus-field-viewer"].locked.rev'; }
+          old=$(git show origin/main:./flake.lock | ffv_rev)
+          new=$(ffv_rev < flake.lock)
+          if [ "$old" = "$new" ]; then
+            echo "main already has focus-field-viewer $new."
+            exit 0
+          fi
+
+          git add flake.lock
+          git commit -m "Update focus-field-viewer for lebpc39"
+          git push --force origin "$branch"
+
+          body="Moves focus-field-viewer from \`${old:0:7}\` to \`${new:0:7}\`: https://github.com/LEB-EPFL/focus-field-viewer/compare/$old...$new
+
+          The system builds with this lock file, but the build doesn't show that the app still works, and the upstream NixOS module runs as root on lebpc39. Review the changes before merging; lebpc39 picks them up at its next Thursday upgrade.
+
+          This branch is refreshed by the weekly update workflow."
+          if [ -n "$(gh pr list --head "$branch" --state open --json number --jq '.[]')" ]; then
+            gh pr edit "$branch" --body "$body"
+            echo "Updated the open pull request on $branch."
+          else
+            gh pr create --base main --head "$branch" \
+              --title "Update focus-field-viewer for lebpc39" --body "$body"
+          fi
+
+      # Runs after any good updates are merged, so the run still shows red
+      # (and GitHub sends its failure email) when an input was held back.
+      - name: Fail if an input was held back
+        if: steps.update.outputs.failed != ''
+        env:
+          FAILED: ${{ steps.update.outputs.failed }}
+        run: |
+          echo "::error::Not updated because the system did not build: $FAILED"
           exit 1

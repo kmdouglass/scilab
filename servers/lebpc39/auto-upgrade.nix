@@ -2,8 +2,8 @@
 
 {
   # Weekly unattended upgrade to whatever is on main. The lock file is bumped
-  # by .github/workflows/update-nixpkgs.yml, so this only ever picks up a
-  # nixpkgs revision that has already built in CI.
+  # by .github/workflows/update-nixpkgs.yml, so this only ever picks up
+  # nixpkgs and focus-field-viewer revisions that have already built in CI.
   system.autoUpgrade = {
     enable = true;
     flake = "github:kmdouglass/scilab?dir=servers/lebpc39#lebpc39";
