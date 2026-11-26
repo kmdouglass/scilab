@@ -75,15 +75,12 @@ in
     };
   };
 
-  # focus-field-viewer's module (github:LEB-EPFL/focus-field-viewer,
-  # nix/module.nix) has no subpath option, but Streamlit itself does:
-  # server.baseUrlPath, settable via STREAMLIT_SERVER_BASE_URL_PATH. This
-  # must match the path proxied above.
+  # Note: focus-field-viewer's STREAMLIT_SERVER_BASE_URL_PATH, which must
+  # match /ffv above, is set in focus-field-viewer.nix.
+
   systemd.tmpfiles.rules = [ "d ${goalsDir} 0755 douglass users -" ];
 
   # Supplies GOALS_AUTH_HASH; see README.md. The leading "-" lets Caddy start
   # without it (the goals page then stays locked).
   systemd.services.caddy.serviceConfig.EnvironmentFile = "-/etc/caddy/secrets.env";
-
-  systemd.services.focus-field-viewer.environment.STREAMLIT_SERVER_BASE_URL_PATH = "ffv";
 }

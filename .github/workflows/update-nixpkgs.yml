@@ -118,8 +118,9 @@ jobs:
           done
           exit 1
 
-      # focus-field-viewer's NixOS module runs as root on lebpc39, and a build
-      # can't tell whether the app still works, so its updates wait for a
+      # focus-field-viewer's code runs on lebpc39 (sandboxed, unprivileged; its
+      # NixOS module isn't used), and a build can't tell whether the app still
+      # works, so its updates wait for a
       # person to review and merge them. The PR lives on one fixed branch that
       # is refreshed each week, so unreviewed updates don't pile up.
       - name: Open a pull request for the focus-field-viewer update
@@ -148,7 +149,7 @@ jobs:
 
           body="Moves focus-field-viewer from \`${old:0:7}\` to \`${new:0:7}\`: https://github.com/LEB-EPFL/focus-field-viewer/compare/$old...$new
 
-          The system builds with this lock file, but the build doesn't show that the app still works, and the upstream NixOS module runs as root on lebpc39. Review the changes before merging; lebpc39 picks them up at its next Thursday upgrade.
+          The system builds with this lock file, but the build doesn't show that the app still works, and the new code will run on lebpc39 (as a sandboxed, unprivileged service). Review the changes before merging; lebpc39 picks them up at its next Thursday upgrade.
 
           This branch is refreshed by the weekly update workflow."
           if [ -n "$(gh pr list --head "$branch" --state open --json number --jq '.[]')" ]; then
