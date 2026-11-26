@@ -16,21 +16,11 @@
   outputs = { self, nixpkgs, scilab-private, focus-field-viewer, ... }@inputs: {
     nixosConfigurations.lebpc39 = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      specialArgs = { inherit scilab-private; };
+      # focus-field-viewer is passed in for its package only; its NixOS
+      # module is not imported (see focus-field-viewer.nix).
+      specialArgs = { inherit scilab-private focus-field-viewer; };
       modules = [
         ./configuration.nix
-
-        focus-field-viewer.nixosModules.default
-        {
-          services.focus-field-viewer = {
-            enable = true;
-            port = 8501;          # default
-            address = "0.0.0.0";  # default; binds to all interfaces for LAN access
-            # Reached only through the Caddy reverse proxy on port 80
-            # (reverse-proxy.nix), not directly.
-            openFirewall = false;
-          };
-        }
       ];
     };
   };
