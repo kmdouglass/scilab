@@ -133,11 +133,15 @@ Then browse `http://localhost:8086`.
 
 ### Accessing Grafana
 
-Grafana is at <http://lebpc39.epfl.ch/grafana/>. Anyone can view dashboards
+Grafana is at <http://lebpc39.epfl.ch/grafana/> and opens on the lab
+environment dashboard (temperature and humidity). Anyone can view dashboards
 without logging in; sign in as `admin` (password in
-`/etc/grafana/secrets/admin.password` on first start) to create or edit them.
-The InfluxDB datasource is already set up. Dashboards live in Grafana's own
-database under `/var/lib/grafana`, not in this repo.
+`/etc/grafana/secrets/admin.password` on first start) to explore data.
+
+Dashboards are defined in `servers/lebpc39/dashboards/` and are read-only in
+the UI; change them there and redeploy. To add a sensor or rename one, edit
+the `sensors` list in `dashboards/environment.nix`. A sensor that isn't in
+the list still shows up, under its MQTT topic.
 
 ### Private flake input
 
