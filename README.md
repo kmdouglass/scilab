@@ -48,6 +48,11 @@ These files must be deployed out-of-band to the target machine:
 - `/etc/mosquitto/secrets/laboleb.password` - The password for the laboleb mosquitto user
 - `/etc/influxdb2/secrets/laboleb.password` - The password for the laboleb InfluxDB2 user (must be owned by the `influxdb2:influxdb2` Linux user:group)
 - `/etc/influxdb2/secrets/laboleb.token` - API token generated with the command `openssl rand -hex 32`
+- `/etc/influxdb2/secrets/grafana.token` - Read-only API token for the
+  `leb_time_series_data` bucket, used by Grafana's InfluxDB datasource.
+  Generate it with `openssl rand -hex 32`. Must be owned by the
+  `influxdb2:influxdb2` Linux user:group with mode `600`; InfluxDB2 won't
+  start without it.
 - `/etc/telegraf/secrets.env` - Credentials Telegraf uses to connect to the local Mosquitto broker as the laboleb user, and to authenticate to InfluxDB2:
 
   ```

@@ -51,12 +51,35 @@ in
         hide_version = true;
       };
     };
+
+    provision = {
+      enable = true;
+      datasources.settings = {
+        apiVersion = 1;
+        datasources = [{
+          name = "InfluxDB";
+          uid = "influxdb";
+          type = "influxdb";
+          access = "proxy";
+          url = "http://localhost:8086";
+          isDefault = true;
+          jsonData = {
+            version = "Flux";
+            organization = "LEB";
+            defaultBucket = "leb_time_series_data";
+          };
+          # Read-only token for leb_time_series_data (metrics.nix).
+          secureJsonData.token = "$__file{${credentials}/influxdb-token}";
+        }];
+      };
+    };
   };
 
   systemd.services.grafana.serviceConfig = {
     LoadCredential = [
       "admin-password:/etc/grafana/secrets/admin.password"
       "secret-key:/etc/grafana/secrets/secret.key"
+      "influxdb-token:/etc/influxdb2/secrets/grafana.token"
     ];
 
     # Network: only talk to localhost (Caddy, InfluxDB2). Grafana has no
