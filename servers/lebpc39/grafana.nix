@@ -8,6 +8,11 @@
 # by root only. Grafana reads them through its $__file{} provider.
 let
   credentials = "/run/credentials/grafana.service";
+
+  # Dashboards are defined in ./dashboards and provisioned read-only: change
+  # them here, not in the UI.
+  dashboards = pkgs.writeTextDir "environment.json"
+    (builtins.toJSON (import ./dashboards/environment.nix { inherit lib; }));
 in
 {
   services.grafana = {
@@ -70,6 +75,15 @@ in
           };
           # Read-only token for leb_time_series_data (metrics.nix).
           secureJsonData.token = "$__file{${credentials}/influxdb-token}";
+        }];
+      };
+      dashboards.settings = {
+        apiVersion = 1;
+        providers = [{
+          name = "scilab";
+          type = "file";
+          allowUiUpdates = false;
+          options.path = dashboards;
         }];
       };
     };
