@@ -79,6 +79,7 @@ in {
 
   # Packages
   environment.systemPackages = with pkgs; [
+    gh
     git
     just
     tmux
