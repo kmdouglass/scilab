@@ -48,6 +48,11 @@ These files must be deployed out-of-band to the target machine:
 - `/etc/mosquitto/secrets/laboleb.password` - The password for the laboleb mosquitto user
 - `/etc/influxdb2/secrets/laboleb.password` - The password for the laboleb InfluxDB2 user (must be owned by the `influxdb2:influxdb2` Linux user:group)
 - `/etc/influxdb2/secrets/laboleb.token` - API token generated with the command `openssl rand -hex 32`
+- `/etc/influxdb2/secrets/grafana.token` - Read-only API token for the
+  `leb_time_series_data` bucket, used by Grafana's InfluxDB datasource.
+  Generate it with `openssl rand -hex 32`. Must be owned by the
+  `influxdb2:influxdb2` Linux user:group with mode `600`; InfluxDB2 won't
+  start without it.
 - `/etc/telegraf/secrets.env` - Credentials Telegraf uses to connect to the local Mosquitto broker as the laboleb user, and to authenticate to InfluxDB2:
 
   ```
@@ -88,6 +93,17 @@ These files must be deployed out-of-band to the target machine:
 
   Use single quotes so the shell leaves the `$` signs in the hash alone.
 
+- `/etc/grafana/secrets/admin.password` - Password for Grafana's `admin`
+  user. Grafana only reads it when it first creates that user, so after the
+  first start change the password in the UI (or with
+  `grafana cli admin reset-admin-password`) instead.
+- `/etc/grafana/secrets/secret.key` - Key Grafana encrypts datasource secrets
+  with, generated with `openssl rand -hex 32`. Don't change it once Grafana
+  has started, or the secrets it has stored can't be decrypted.
+
+  Both are read by systemd, so they can be owned by root with mode `600`.
+  Grafana won't start without them.
+
 - `/etc/scilab-private/servers/lebpc39/network-local.nix` - Copy of the file
   from the `scilab-private` repo. The weekly automatic upgrade runs on the
   server, where the repo's `flake.lock` path to `scilab-private` doesn't
@@ -114,6 +130,14 @@ ssh -L 8086:localhost:8086 douglass@lebpc39
 ```
 
 Then browse `http://localhost:8086`.
+
+### Accessing Grafana
+
+Grafana is at <http://lebpc39.epfl.ch/grafana/>. Anyone can view dashboards
+without logging in; sign in as `admin` (password in
+`/etc/grafana/secrets/admin.password` on first start) to create or edit them.
+The InfluxDB datasource is already set up. Dashboards live in Grafana's own
+database under `/var/lib/grafana`, not in this repo.
 
 ### Private flake input
 

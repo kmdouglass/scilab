@@ -8,6 +8,7 @@ in {
     ./auto-upgrade.nix
     ./bash-aliases.nix
     ./focus-field-viewer.nix
+    ./grafana.nix
     ./metrics.nix
     ./mqtt.nix
     ./probe-rs.nix
