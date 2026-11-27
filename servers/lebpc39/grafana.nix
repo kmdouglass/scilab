@@ -45,6 +45,9 @@ in
         secret_key = "$__file{${credentials}/secret-key}";
       };
 
+      # Visitors to /grafana/ land on the lab environment dashboard.
+      dashboards.default_home_dashboard_path = "${dashboards}/environment.json";
+
       # Anyone on the LAN can view dashboards without logging in; editing
       # needs a login. "Main Org." is Grafana's default organization, which
       # must exist under this name. This is plain HTTP, so login passwords
