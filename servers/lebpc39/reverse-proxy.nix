@@ -56,6 +56,14 @@ in
           reverse_proxy localhost:8501
         }
 
+        redir /grafana /grafana/ 308
+
+        # Not handle_path: Grafana is set to serve from /grafana itself
+        # (grafana.nix), so the prefix must be passed through.
+        handle /grafana/* {
+          reverse_proxy localhost:3000
+        }
+
         redir /goals /goals/ 308
 
         # Password-protected: the page includes full SMART goal text. This is
@@ -76,7 +84,8 @@ in
   };
 
   # Note: focus-field-viewer's STREAMLIT_SERVER_BASE_URL_PATH, which must
-  # match /ffv above, is set in focus-field-viewer.nix.
+  # match /ffv above, is set in focus-field-viewer.nix. Likewise Grafana's
+  # root_url must match /grafana (grafana.nix).
 
   systemd.tmpfiles.rules = [ "d ${goalsDir} 0755 douglass users -" ];
 

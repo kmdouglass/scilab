@@ -23,6 +23,13 @@ in
         # Loopback only.
         http_addr = "127.0.0.1";
         http_port = 3000;
+
+        # Reached through Caddy at /grafana/ (reverse-proxy.nix). Grafana
+        # builds its links and redirects from root_url, and with
+        # serve_from_sub_path expects requests to keep the /grafana prefix.
+        domain = "lebpc39.epfl.ch";
+        root_url = "http://%(domain)s/grafana/";
+        serve_from_sub_path = true;
       };
 
       security = {
