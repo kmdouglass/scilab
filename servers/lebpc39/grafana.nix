@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 
-# Grafana, for dashboards over the environmental sensor data in InfluxDB2
+# Grafana, for dashboards over, for example, the environmental sensor data in InfluxDB2
 # (mqtt.nix, metrics.nix).
 #
 # Secrets are read from out-of-band files (see README.md) and handed to the
