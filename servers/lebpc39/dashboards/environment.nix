@@ -33,6 +33,42 @@ let
       |> group(columns: ["sensor"])
   '';
 
+  # Latest value of `field` per sensor. Only the last hour is searched, so a
+  # sensor that has stopped reporting disappears instead of showing a stale
+  # reading.
+  latestQuery = field: ''
+    from(bucket: "leb_time_series_data")
+      |> range(start: -1h)
+      |> filter(fn: (r) => r._measurement == "environmental_sensors" and r._field == "${field}")
+      |> last()
+      |> map(fn: (r) => ({r with sensor: ${sensorName}}))
+      |> keep(columns: ["_time", "_value", "sensor"])
+      |> group(columns: ["sensor"])
+  '';
+
+  stat = { id, title, field, unit, gridPos }: {
+    inherit id title gridPos datasource;
+    type = "stat";
+    targets = [{ refId = "A"; inherit datasource; query = latestQuery field; }];
+    fieldConfig = {
+      defaults = {
+        inherit unit;
+        decimals = 1;
+        displayName = "\${__field.labels.sensor}";
+        color = { mode = "fixed"; fixedColor = "text"; };
+      };
+      overrides = [ ];
+    };
+    options = {
+      reduceOptions = { calcs = [ "lastNotNull" ]; fields = ""; values = false; };
+      colorMode = "value";
+      graphMode = "none";
+      textMode = "value_and_name";
+      orientation = "auto";
+      justifyMode = "auto";
+    };
+  };
+
   timeSeries = { id, title, field, unit, gridPos }: {
     inherit id title gridPos datasource;
     type = "timeseries";
@@ -62,19 +98,33 @@ in
   schemaVersion = 39;
 
   panels = [
+    (stat {
+      id = 3;
+      title = "Temperature now";
+      field = "SI7021_Temperature";
+      unit = "celsius";
+      gridPos = { x = 0; y = 0; w = 12; h = 4; };
+    })
+    (stat {
+      id = 4;
+      title = "Humidity now";
+      field = "SI7021_Humidity";
+      unit = "humidity";
+      gridPos = { x = 12; y = 0; w = 12; h = 4; };
+    })
     (timeSeries {
       id = 1;
       title = "Temperature";
       field = "SI7021_Temperature";
       unit = "celsius";
-      gridPos = { x = 0; y = 0; w = 24; h = 9; };
+      gridPos = { x = 0; y = 4; w = 24; h = 9; };
     })
     (timeSeries {
       id = 2;
       title = "Humidity";
       field = "SI7021_Humidity";
       unit = "humidity";
-      gridPos = { x = 0; y = 9; w = 24; h = 9; };
+      gridPos = { x = 0; y = 13; w = 24; h = 9; };
     })
   ];
 }
