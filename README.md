@@ -88,6 +88,17 @@ These files must be deployed out-of-band to the target machine:
 
   Use single quotes so the shell leaves the `$` signs in the hash alone.
 
+- `/etc/grafana/secrets/admin.password` - Password for Grafana's `admin`
+  user. Grafana only reads it when it first creates that user, so after the
+  first start change the password in the UI (or with
+  `grafana cli admin reset-admin-password`) instead.
+- `/etc/grafana/secrets/secret.key` - Key Grafana encrypts datasource secrets
+  with, generated with `openssl rand -hex 32`. Don't change it once Grafana
+  has started, or the secrets it has stored can't be decrypted.
+
+  Both are read by systemd, so they can be owned by root with mode `600`.
+  Grafana won't start without them.
+
 - `/etc/scilab-private/servers/lebpc39/network-local.nix` - Copy of the file
   from the `scilab-private` repo. The weekly automatic upgrade runs on the
   server, where the repo's `flake.lock` path to `scilab-private` doesn't
