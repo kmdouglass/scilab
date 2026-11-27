@@ -131,6 +131,14 @@ ssh -L 8086:localhost:8086 douglass@lebpc39
 
 Then browse `http://localhost:8086`.
 
+### Accessing Grafana
+
+Grafana is at <http://lebpc39.epfl.ch/grafana/>. Anyone can view dashboards
+without logging in; sign in as `admin` (password in
+`/etc/grafana/secrets/admin.password` on first start) to create or edit them.
+The InfluxDB datasource is already set up. Dashboards live in Grafana's own
+database under `/var/lib/grafana`, not in this repo.
+
 ### Private flake input
 
 Nix flakes only see files tracked by Git, so anything with real
