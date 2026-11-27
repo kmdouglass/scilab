@@ -39,6 +39,17 @@ in
         # later makes the stored secrets unreadable.
         secret_key = "$__file{${credentials}/secret-key}";
       };
+
+      # Anyone on the LAN can view dashboards without logging in; editing
+      # needs a login. "Main Org." is Grafana's default organization, which
+      # must exist under this name. This is plain HTTP, so login passwords
+      # cross the network unencrypted.
+      "auth.anonymous" = {
+        enabled = true;
+        org_name = "Main Org.";
+        org_role = "Viewer";
+        hide_version = true;
+      };
     };
   };
 
